@@ -30,7 +30,7 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <img
-            src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png"
             alt="Instagram Logo"
             class="mx-auto mb-6 w-44"
         />
@@ -46,7 +46,7 @@
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" onclick="togglePassword('currentPassword')">Göstər</span>
+                <span class="toggle-password" data-target="currentPassword">Göstər</span>
             </div>
             <div class="mb-4 relative">
                 <input
@@ -56,7 +56,7 @@
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" onclick="togglePassword('newPassword')">Göstər</span>
+                <span class="toggle-password" data-target="newPassword">Göstər</span>
                 <div id="passwordStrength" class="password-strength"></div>
                 <p id="strengthText" class="text-sm text-gray-500 mt-1"></p>
             </div>
@@ -68,7 +68,7 @@
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" onclick="togglePassword('confirmPassword')">Göstər</span>
+                <span class="toggle-password" data-target="confirmPassword">Göstər</span>
             </div>
             <p id="successMessage" class="text-green-500 text-sm mb-4 hidden">
                 Şifrə uğurla saxlanıldı!
@@ -79,6 +79,9 @@
             >
                 Şifrəni Dəyiş
             </button>
+            <div class="text-center mt-4">
+                <a href="#" class="text-blue-500 text-sm hover:underline">Şifrənizi unutdunuz?</a>
+            </div>
         </form>
     </div>
 
@@ -107,17 +110,20 @@
             console.error("Firebase başlama xətası:", error);
         }
 
-        function togglePassword(id) {
-            const input = document.getElementById(id);
-            const toggle = input.nextElementSibling;
-            if (input.type === 'password') {
-                input.type = 'text';
-                toggle.textContent = 'Gizlə';
-            } else {
-                input.type = 'password';
-                toggle.textContent = 'Göstər';
-            }
-        }
+        // Göstər/Gizlə funksiyası
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    toggle.textContent = 'Gizlə';
+                } else {
+                    input.type = 'password';
+                    toggle.textContent = 'Göstər';
+                }
+            });
+        });
 
         const form = document.getElementById('passwordForm');
         const currentPassword = document.getElementById('currentPassword');
