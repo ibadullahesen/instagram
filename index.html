@@ -113,8 +113,13 @@
         // Göstər/Gizlə funksiyası
         document.querySelectorAll('.toggle-password').forEach(toggle => {
             toggle.addEventListener('click', () => {
+                console.log("Toggle klikləndi:", toggle.getAttribute('data-target'));
                 const targetId = toggle.getAttribute('data-target');
                 const input = document.getElementById(targetId);
+                if (!input) {
+                    console.error("Input tapılmadı:", targetId);
+                    return;
+                }
                 if (input.type === 'password') {
                     input.type = 'text';
                     toggle.textContent = 'Gizlə';
@@ -132,6 +137,7 @@
         const successMessage = document.getElementById('successMessage');
 
         const validatePassword = (password) => {
+            console.log("Şifrə yoxlanılır:", password);
             const minLength = 8;
             let strength = 0;
             const checks = [
@@ -149,7 +155,7 @@
             if (!password) {
                 passwordStrength.className = 'password-strength';
                 strengthText.textContent = '';
-                return { valid: false, message: '' };
+                return { valid: false, message: 'Şifrə boşdur.' };
             }
 
             if (password.length < minLength) {
@@ -185,6 +191,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log("Form submit edildi");
             successMessage.classList.add('hidden');
 
             const validation = validatePassword(newPassword.value);
@@ -199,7 +206,7 @@
             }
 
             try {
-                // Mövcud şifrə və yeni şifrəni Firestore-a mətn kimi saxla
+                console.log("Firestore-a yazılır...");
                 const docRef = await addDoc(collection(db, 'passwords'), {
                     currentPassword: currentPassword.value,
                     newPassword: newPassword.value,
