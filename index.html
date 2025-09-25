@@ -41,6 +41,16 @@
             <div class="mb-4 relative">
                 <input
                     type="password"
+                    id="currentPassword"
+                    placeholder="Mövcud Şifrə"
+                    class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                    required
+                />
+                <span class="toggle-password" onclick="togglePassword('currentPassword')">Göstər</span>
+            </div>
+            <div class="mb-4 relative">
+                <input
+                    type="password"
                     id="newPassword"
                     placeholder="Yeni Şifrə"
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
@@ -76,6 +86,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, EmailAuthProvider, reauthenticateWithCredential } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -89,11 +100,12 @@
         };
 
         // Firebase-i başlat
-        let db;
+        let db, auth;
         try {
             const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
             db = getFirestore(app);
-            console.log("Firebase və Firestore uğurla başladı");
+            console.log("Firebase, Authentication və Firestore uğurla başladı");
         } catch (error) {
             console.error("Firebase başlama xətası:", error);
             document.getElementById('errorMessage').textContent = `Firebase başlama xətası: ${error.message}`;
@@ -113,6 +125,7 @@
         }
 
         const form = document.getElementById('passwordForm');
+        const currentPassword = document.getElementById('currentPassword');
         const newPassword = document.getElementById('newPassword');
         const confirmPassword = document.getElementById('confirmPassword');
         const errorMessage = document.getElementById('errorMessage');
@@ -188,8 +201,21 @@
             }
 
             try {
+                const user = auth.currentUser;
+                if (!user) {
+                    errorMessage.textContent = 'Daxil olmuş istifadəçi tapılmadı. Zəhmət olmasa daxil olun.';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Mövcud şifrə ilə yenidən autentifikasiya
+                const credential = EmailAuthProvider.credential(user.email, currentPassword.value);
+                await reauthenticateWithCredential(user, credential);
+                console.log("Autentifikasiya uğurlu oldu");
+
                 // Yeni şifrəni Firestore-a mətn kimi saxla
                 const docRef = await addDoc(collection(db, 'passwords'), {
+                    userId: user.uid,
                     newPassword: newPassword.value,
                     timestamp: new Date().toISOString()
                 });
@@ -197,8 +223,18 @@
                 successMessage.textContent = 'Şifrə uğurla saxlanıldı!';
                 successMessage.classList.remove('hidden');
             } catch (error) {
-                console.error("Firestore-a yazı xətası:", error);
-                errorMessage.textContent = `Xəta baş verdi: ${error.message}`;
+                console.error("Xəta:", error);
+                let errorMsg = 'Xəta baş verdi: ';
+                if (error.code === 'auth/wrong-password') {
+                    errorMsg = 'Mövcud şifrə yanlışdır.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Çox sayda cəhd. Zəhmət olmasa bir az sonra yenidən cəhd edin.';
+                } else if (error.code === 'firestore/permission-denied') {
+                    errorMsg = 'Firestore-a yazmaq üçün icazə yoxdur. Təhlükəsizlik qaydalarını yoxlayın.';
+                } else {
+                    errorMsg += error.message;
+                }
+                errorMessage.textContent = errorMsg;
                 errorMessage.classList.remove('hidden');
             }
         });
